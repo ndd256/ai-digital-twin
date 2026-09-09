@@ -11,12 +11,15 @@ from sqlalchemy import (
     Integer,
     Float,
     Index,
-    func
+    func,
+    UniqueConstraint,
+    Boolean
 )
 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
+from datetime import datetime, date
 
 from database.session import Base
 
@@ -581,3 +584,61 @@ class VivaExchange(Base):
 
     session = relationship("VivaSession", back_populates="exchanges")
 
+# ============================================================
+# REVISION SCHEDULE MODELS
+# ============================================================
+
+class RevisionSchedule(Base):
+    """Current SM-2 scheduling state for one (student, subject, topic)."""
+    __tablename__ = "revision_schedules"
+ 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("students.student_id"), nullable=False, index=True)
+ 
+    subject = Column(String, nullable=False)
+    topic = Column(String, nullable=False)
+ 
+    # --- SM-2 state ---
+    repetition_number = Column(Integer, nullable=False, default=0)
+    easiness_factor = Column(Float, nullable=False, default=2.5)   # sm2_initial_ef
+    interval_days = Column(Integer, nullable=False, default=0)
+    next_review_date = Column(Date, nullable=False, default=date.today)
+    last_reviewed_at = Column(DateTime, nullable=True)
+ 
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+ 
+    history = relationship(
+        "RevisionHistory",
+        back_populates="schedule",
+        cascade="all, delete-orphan",   # matches your cleanup-via-cascade test pattern
+    )
+ 
+    __table_args__ = (
+        UniqueConstraint("student_id", "subject", "topic", name="uq_student_subject_topic"),
+    )
+ 
+ 
+class RevisionHistory(Base):
+    """Append-only log of every review, for audit / analytics / debugging."""
+    __tablename__ = "revision_history"
+ 
+    id = Column(Integer, primary_key=True, index=True)
+    schedule_id = Column(UUID(as_uuid=True), ForeignKey("revision_schedules.id"), nullable=False, index=True)
+ 
+    quality = Column(Integer, nullable=False)          # 0-5 score given for this review
+    was_success = Column(Boolean, nullable=False)       # quality >= 3
+ 
+    # state BEFORE this review (useful for debugging "why did EF jump like that")
+    easiness_factor_before = Column(Float, nullable=False)
+    interval_days_before = Column(Integer, nullable=False)
+    repetition_number_before = Column(Integer, nullable=False)
+ 
+    # state AFTER this review
+    easiness_factor_after = Column(Float, nullable=False)
+    interval_days_after = Column(Integer, nullable=False)
+    repetition_number_after = Column(Integer, nullable=False)
+ 
+    reviewed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+ 
+    schedule = relationship("RevisionSchedule", back_populates="history")
