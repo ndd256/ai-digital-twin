@@ -12,6 +12,7 @@ call, so the route handlers stay thin:
     schedule = apply_review(db, schedule, quality=4)
 """
 
+import uuid
 from datetime import date
 from sqlalchemy.orm import Session
 
@@ -19,7 +20,7 @@ from .sm2_service import SM2State, review as sm2_review
 from database.models import RevisionSchedule, RevisionHistory
 
 
-def get_or_create_schedule(db: Session, student_id: int, subject: str, topic: str) -> RevisionSchedule:
+def get_or_create_schedule(db: Session, student_id: uuid.UUID, subject: str, topic: str) -> RevisionSchedule:
     """
     Fetch the current schedule row for this (student, subject, topic),
     or create a fresh one seeded at sm2_initial_ef=2.5 if this is the
