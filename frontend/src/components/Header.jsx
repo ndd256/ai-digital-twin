@@ -55,10 +55,21 @@ const Header = () => {
             </li>
 
             <li>
+              <Link
+                to="/revision-planner"
+                className="nav-link nav-item-custom"
+              >
+                Revision Planner
+              </Link>
+            </li>
+
+            <li>
               <Link to="/dashboard" className="nav-link nav-item-custom">
                 Top Struggles
               </Link>
             </li>
+
+
 
             <li>
               <Link

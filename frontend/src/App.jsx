@@ -11,6 +11,7 @@ import ParentsOverview from './pages/ParentsOverview';
 import Library from './pages/Library';
 import TestPage from './pages/TestPage';
 import Dashboard from './pages/Dashboard';
+import RevisionPlanner from './pages/RevisionPlanner';
 import PDFUpload from './pages/PDFUpload';
 import StudentProfile from './pages/StudentProfile';
 import VivaRoom from './pages/VivaRoom';
@@ -63,6 +64,11 @@ function App() {
 
           {/* Protected Student Dashboard */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+          {/* Revision Planner */}
+          <Route path="/revision-planner" element={<RevisionPlanner />} />
+
+
 
           {/* Public Home */}
           <Route
