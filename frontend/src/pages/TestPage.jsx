@@ -13,7 +13,6 @@ import {
 } from 'react-bootstrap'
 import {
   practiceQuestionBank,
-  practiceSubjects,
 } from '../data/mockData.js'
 import VivaRoom from './VivaRoom'
 
@@ -234,78 +233,6 @@ const pageStyles = `
 .test-page-shell .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: #38bdf8;
 }
-
-
-/* ================= DYNAMIC QUIZ UI ================= */
-.dynamic-quiz { animation: dynamicQuizIn .4s ease both; }
-@keyframes dynamicQuizIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.dynamic-quiz-header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:28px 32px; margin-bottom:18px; border:1px solid #262626; border-radius:24px; background:linear-gradient(135deg,#121212,#0b0b0b); box-shadow:0 20px 60px rgba(0,0,0,.25); }
-.dynamic-eyebrow { color:#64748b; font-size:10px; font-weight:800; letter-spacing:.16em; margin-bottom:7px; }
-.dynamic-title { margin:0; color:#f8fafc; font-size:clamp(28px,4vw,40px); font-weight:700; }
-.dynamic-title span { color:#64748b; font-weight:500; }
-.dynamic-meta { display:flex; gap:18px; margin-top:9px; color:#8a94a6; font-size:12px; }
-.dynamic-meta span { display:flex; align-items:center; gap:6px; }
-.dynamic-meta i { color:#38bdf8; }
-.dynamic-timer { display:flex; align-items:center; gap:12px; min-width:165px; padding:13px 17px; border:1px solid #292929; border-radius:17px; background:#101010; }
-.dynamic-timer-icon { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:13px; color:#38bdf8; background:rgba(56,189,248,.1); font-size:18px; }
-.dynamic-timer-label { color:#64748b; font-size:9px; font-weight:800; letter-spacing:.13em; }
-.dynamic-timer-value { color:#f8fafc; font-size:19px; font-weight:700; margin-top:2px; }
-.dynamic-progress-wrap { margin:0 4px 22px; }
-.dynamic-progress-info { display:flex; justify-content:space-between; color:#94a3b8; font-size:13px; font-weight:600; margin-bottom:8px; }
-.dynamic-progress-info strong { color:#38bdf8; }
-.dynamic-progress-track { height:8px; overflow:hidden; border-radius:999px; background:#1e293b; }
-.dynamic-progress-fill { height:100%; border-radius:inherit; background:linear-gradient(90deg,#38bdf8,#818cf8); transition:width .45s cubic-bezier(.4,0,.2,1); box-shadow:0 0 18px rgba(56,189,248,.35); }
-.dynamic-progress-caption { color:#64748b; font-size:11px; margin-top:6px; }
-.dynamic-quiz-layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:20px; align-items:start; }
-.dynamic-question-card { padding:clamp(22px,4vw,42px); border-radius:26px; background:linear-gradient(145deg,#111,#0c0c0c); border:1px solid #262626; box-shadow:0 25px 70px rgba(0,0,0,.25); animation:questionIn .35s ease both; }
-@keyframes questionIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
-.dynamic-question-head { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:28px; }
-.dynamic-tags { display:flex; flex-wrap:wrap; gap:8px; }
-.dynamic-tags span { display:inline-flex; align-items:center; gap:6px; padding:7px 11px; border:1px solid #292929; border-radius:999px; background:#161616; color:#94a3b8; font-size:10px; }
-.dynamic-tags i { color:#38bdf8; }
-.dynamic-q-number { color:#475569; font-size:14px; font-weight:800; }
-.dynamic-question-title-row { display:flex; align-items:flex-start; gap:17px; margin-bottom:31px; }
-.dynamic-question-icon { flex:0 0 auto; width:46px; height:46px; display:flex; align-items:center; justify-content:center; border-radius:15px; color:#38bdf8; background:rgba(56,189,248,.1); border:1px solid rgba(56,189,248,.18); font-size:20px; }
-.dynamic-question-title-row h3 { margin:0; color:#f8fafc; font-size:clamp(20px,3vw,29px); line-height:1.4; font-weight:650; }
-.dynamic-options { display:grid; gap:12px; }
-.dynamic-option { width:100%; display:flex; align-items:center; gap:14px; padding:15px 17px; border-radius:17px; background:#111; border:1px solid #292929; color:#cbd5e1; text-align:left; cursor:pointer; transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease; }
-.dynamic-option:hover { transform:translateY(-2px); border-color:#3f3f46; background:#151515; box-shadow:0 10px 25px rgba(0,0,0,.18); }
-.dynamic-option.selected { transform:translateY(-2px); background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(129,140,248,.08)); border-color:#38bdf8; color:#f8fafc; box-shadow:0 0 0 1px rgba(56,189,248,.1),0 10px 30px rgba(56,189,248,.08); }
-.dynamic-option-letter { flex:0 0 auto; width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:#181818; border:1px solid #303030; color:#64748b; font-weight:800; transition:.2s ease; }
-.dynamic-option.selected .dynamic-option-letter { background:#38bdf8; border-color:#38bdf8; color:#06131a; }
-.dynamic-option-text { flex:1; font-size:15px; line-height:1.5; }
-.dynamic-option-check { color:#475569; font-size:18px; transition:.2s ease; }
-.dynamic-option.selected .dynamic-option-check { color:#38bdf8; transform:scale(1.12); }
-.dynamic-navigation { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:30px; padding-top:25px; border-top:1px solid #262626; }
-.dynamic-nav { min-height:48px; padding:0 18px; border-radius:14px !important; display:inline-flex !important; align-items:center; justify-content:center; gap:8px; font-weight:700 !important; transition:transform .2s ease,box-shadow .2s ease !important; }
-.dynamic-nav:hover:not(:disabled) { transform:translateY(-2px); }
-.dynamic-nav.secondary { background:#151515 !important; border:1px solid #303030 !important; color:#cbd5e1 !important; }
-.dynamic-nav.primary { background:linear-gradient(135deg,#38bdf8,#6366f1) !important; border:0 !important; color:white !important; box-shadow:0 8px 25px rgba(56,189,248,.18); }
-.dynamic-nav.submit { background:linear-gradient(135deg,#22c55e,#16a34a) !important; border:0 !important; color:white !important; }
-.dynamic-nav-center { display:flex; flex-direction:column; align-items:center; color:#64748b; font-size:10px; }
-.dynamic-nav-center strong { color:#e2e8f0; font-size:14px; }
-.dynamic-navigator { position:sticky; top:20px; padding:22px; border-radius:24px; background:#101010; border:1px solid #262626; box-shadow:0 20px 50px rgba(0,0,0,.2); }
-.dynamic-navigator-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
-.dynamic-navigator-head h4 { margin:4px 0 0; color:#f8fafc; font-size:18px; }
-.dynamic-navigator-head > span { padding:6px 9px; border-radius:10px; background:#181818; color:#38bdf8; font-size:12px; font-weight:800; }
-.dynamic-answer-progress { height:5px; overflow:hidden; margin-bottom:20px; border-radius:999px; background:#1e293b; }
-.dynamic-answer-progress div { height:100%; border-radius:inherit; background:#22c55e; transition:width .3s ease; }
-.dynamic-question-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
-.dynamic-question-btn { aspect-ratio:1; border-radius:11px; background:#151515; border:1px solid #292929; color:#64748b; font-size:12px; font-weight:800; cursor:pointer; transition:.2s ease; }
-.dynamic-question-btn:hover { transform:translateY(-2px); border-color:#38bdf8; color:#e2e8f0; }
-.dynamic-question-btn.answered { background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.35); color:#4ade80; }
-.dynamic-question-btn.current { background:#38bdf8; border-color:#38bdf8; color:#06131a; transform:scale(1.05); box-shadow:0 0 15px rgba(56,189,248,.25); }
-.dynamic-question-btn.current.answered { background:#38bdf8; border-color:#38bdf8; color:#06131a; }
-.dynamic-legend { display:flex; flex-direction:column; gap:9px; margin-top:22px; padding-top:18px; border-top:1px solid #262626; color:#64748b; font-size:10px; }
-.dynamic-legend span { display:flex; align-items:center; gap:8px; }
-.dynamic-legend b { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.current-dot { background:#38bdf8; }.answered-dot { background:#22c55e; }.pending-dot { background:#475569; }
-.dynamic-session-tip { display:flex; gap:10px; margin-top:20px; padding:13px; border-radius:15px; background:rgba(56,189,248,.06); border:1px solid #242424; }
-.dynamic-session-tip > div { flex:0 0 auto; width:33px; height:33px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:rgba(56,189,248,.12); color:#38bdf8; }
-.dynamic-session-tip p { margin:0; color:#64748b; font-size:10px; line-height:1.5; }.dynamic-session-tip strong { color:#e2e8f0; }
-@media (max-width:1100px) { .dynamic-quiz-layout { grid-template-columns:1fr; } .dynamic-navigator { position:static; } .dynamic-question-grid { grid-template-columns:repeat(10,1fr); } }
-@media (max-width:768px) { .dynamic-quiz-header { flex-direction:column; align-items:stretch; padding:22px; } .dynamic-timer { width:100%; } .dynamic-question-title-row { flex-direction:column; } .dynamic-navigation { flex-wrap:wrap; } .dynamic-nav { flex:1; } .dynamic-nav-center { order:3; width:100%; } .dynamic-question-grid { grid-template-columns:repeat(8,1fr); } }
-@media (max-width:480px) { .dynamic-meta { flex-direction:column; gap:5px; } .dynamic-question-card { padding:18px; } .dynamic-option { padding:13px; } .dynamic-option-letter { width:34px; height:34px; } .dynamic-option-text { font-size:13px; } .dynamic-question-grid { grid-template-columns:repeat(5,1fr); } }
 `
 
 function formatDuration(totalSeconds) {
@@ -373,14 +300,14 @@ function normalizeGeneratedQuestions(
       )
         ? question.options
         : Array.isArray(
-          question?.choices
-        )
-          ? question.choices
-          : Array.isArray(
+            question?.choices
+          )
+        ? question.choices
+        : Array.isArray(
             question?.answers
           )
-            ? question.answers
-            : []
+        ? question.answers
+        : []
 
       const options = rawOptions.map(
         (option, optionIndex) => {
@@ -411,6 +338,20 @@ function normalizeGeneratedQuestions(
         }
       )
 
+      const correctAnswer =
+        question?.correctOptionId ||
+        question?.correct_option_id ||
+        question?.correct_answer ||
+        question?.answer ||
+        null
+
+      const correctOption = options.find(
+        (option) =>
+          String(option.id) === String(correctAnswer) ||
+          String(option.text).trim().toLowerCase() ===
+            String(correctAnswer).trim().toLowerCase()
+      )
+
       return {
         ...question,
 
@@ -427,12 +368,7 @@ function normalizeGeneratedQuestions(
 
         options,
 
-        correctOptionId:
-          question?.correctOptionId ||
-          question?.correct_option_id ||
-          question?.correct_answer ||
-          question?.answer ||
-          null,
+        correctOptionId: correctOption?.id || null,
 
         subjectName:
           question?.subjectName ||
@@ -447,6 +383,7 @@ function normalizeGeneratedQuestions(
         sourceLabel:
           question?.sourceLabel ||
           question?.source ||
+          question?.source_citation ||
           'Generated',
 
         sampleStudentResponse:
@@ -540,10 +477,10 @@ function createQuizResults(
   return {
     accuracy: breakdown.length
       ? Math.round(
-        (correctCount /
-          breakdown.length) *
-        100
-      )
+          (correctCount /
+            breakdown.length) *
+            100
+        )
       : 0,
 
     correctCount,
@@ -580,23 +517,23 @@ function createVivaResults(
     pairedCount >= 5
       ? 'Strong Conceptual Grasp'
       : pairedCount >= 3
-        ? 'Solid Conceptual Base'
-        : 'Needs More Articulation'
+      ? 'Solid Conceptual Base'
+      : 'Needs More Articulation'
 
   const strengths =
     pairedCount >= 5
       ? [
-        'Uses subject terminology with confidence',
-        'Keeps answers structured and complete',
-        'Connects concepts across prompts',
-      ]
+          'Uses subject terminology with confidence',
+          'Keeps answers structured and complete',
+          'Connects concepts across prompts',
+        ]
       : pairedCount >= 3
-        ? [
+      ? [
           'Shows core recall under prompt changes',
           'Responds clearly with minimal hesitation',
           'Maintains topic alignment during follow-ups',
         ]
-        : [
+      : [
           'Shows baseline familiarity with the topic',
           'Responds to prompts with simple recall',
         ]
@@ -604,14 +541,14 @@ function createVivaResults(
   const areasToImprove =
     pairedCount >= 5
       ? [
-        'Add one more concrete example per answer',
-        'Slow slightly on transitions between points',
-      ]
+          'Add one more concrete example per answer',
+          'Slow slightly on transitions between points',
+        ]
       : [
-        'Expand answers with supporting detail',
-        'Use stronger signposting before concluding',
-        'Practice a fuller explanation rhythm',
-      ]
+          'Expand answers with supporting detail',
+          'Use stronger signposting before concluding',
+          'Practice a fuller explanation rhythm',
+        ]
 
   return {
     performanceLabel,
@@ -712,10 +649,11 @@ function ExpandableRow({
           </div>
 
           <i
-            className={`bi ${expanded
-              ? 'bi-chevron-up'
-              : 'bi-chevron-down'
-              }`}
+            className={`bi ${
+              expanded
+                ? 'bi-chevron-up'
+                : 'bi-chevron-down'
+            }`}
             aria-hidden="true"
             style={{
               color: '#8a94a6',
@@ -856,6 +794,14 @@ export default function TestPage() {
     setSelectedSubjects,
   ] = useState([])
 
+  const [uploadedDocuments, setUploadedDocuments] = useState([])
+  const [documentsLoading, setDocumentsLoading] = useState(true)
+  const [documentsError, setDocumentsError] = useState('')
+  const [generationError, setGenerationError] = useState('')
+
+  // True while we're waiting on POST /tests/generate to come back.
+  const [generatingSession, setGeneratingSession] = useState(false)
+
   const [
     questionCount,
     setQuestionCount,
@@ -946,224 +892,231 @@ export default function TestPage() {
   ])
 
   const subjectMap = useMemo(() => {
-    const safeSubjects =
-      Array.isArray(
-        practiceSubjects
-      )
-        ? practiceSubjects
-        : []
-
     return new Map(
-      safeSubjects.map(
-        (subject) => [
-          subject.id,
-          subject,
-        ]
-      )
+      uploadedDocuments.map((document) => [
+        document.document_id,
+        document,
+      ])
     )
-  }, [])
+  }, [uploadedDocuments])
 
-  const setupPreviewQuestions =
-    useMemo(() => {
-      return buildGeneratedQuestions(
-        selectedSubjects,
-        questionCount
-      )
-    }, [
-      questionCount,
-      selectedSubjects,
-    ])
+  const setupPreviewQuestions = useMemo(() => [], [])
 
   const activeQuestions =
     sessionState === 'setup'
       ? setupPreviewQuestions
       : Array.isArray(questions)
-        ? questions
-        : []
+      ? questions
+      : []
 
   const currentQuestion =
-    activeQuestions[
-    currentQuestionIndex
-    ] || null
+    activeQuestions[currentQuestionIndex] || null
 
   const elapsedSeconds =
     sessionStartedAt
       ? getElapsedSeconds(
-        sessionStartedAt,
-        sessionCompletedAt ??
-        displayNow
-      )
+          sessionStartedAt,
+          sessionCompletedAt ?? displayNow
+        )
       : 0
 
-  const elapsedLabel =
-    formatDuration(elapsedSeconds)
+  const elapsedLabel = formatDuration(elapsedSeconds)
 
-  const selectedSubjectNames =
-    selectedSubjects.length
-      ? selectedSubjects
-        .map(
-          (subjectId) =>
-            subjectMap.get(
-              subjectId
-            )?.name
-        )
+  const selectedSubjectNames = selectedSubjects.length
+    ? selectedSubjects
+        .map((documentId) => {
+          const document = subjectMap.get(documentId)
+          return (
+            document?.subject ||
+            document?.filename?.replace(/\.pdf$/i, '') ||
+            'Uploaded Notes'
+          )
+        })
         .filter(Boolean)
-      : practiceSubjects.map(
-        (subject) => subject.name
-      )
+    : []
 
-  const initializeSession =
-    async () => {
+  useEffect(() => {
+    const fetchUploadedDocuments = async () => {
+      const studentId = user?.student_id || user?.id
+
+      if (!studentId) {
+        setUploadedDocuments([])
+        setDocumentsLoading(false)
+        return
+      }
+
+      setDocumentsLoading(true)
+      setDocumentsError('')
+
       try {
-        const topic =
-          selectedSubjectNames.length
-            ? selectedSubjectNames.join(
-              ', '
-            )
-            : 'General'
-
-        const studentId =
-          user?.student_id ||
-          user?.id ||
-          'unknown'
-
-        const res = await fetch(
-          `${API_URL}/api/v1/tests/generate`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type':
-                'application/json',
-            },
-            body: JSON.stringify({
-              student_id: studentId,
-              num_questions:
-                questionCount,
-              topic,
-            }),
-          }
+        const response = await fetch(
+          `${API_URL}/api/v1/documents/${studentId}`
         )
 
-        if (!res.ok) {
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
           throw new Error(
-            `Test generation failed: ${res.status}`
+            data?.detail ||
+              `Failed to load uploaded PDFs (${response.status})`
           )
         }
 
-        const data =
-          await res.json()
+        const documents = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.documents)
+          ? data.documents
+          : []
 
-        console.log(
-          'GENERATE TEST RESPONSE:',
-          data
-        )
+        const normalizedDocuments = documents
+          .filter((document) => document?.document_id)
+          .map((document) => ({
+            ...document,
+            subject:
+              document.subject ||
+              document.filename?.replace(/\.pdf$/i, '') ||
+              'Uploaded Notes',
+          }))
 
-        let generatedQuestions =
-          normalizeGeneratedQuestions(
-            data?.questions
-          )
-
-        if (
-          !generatedQuestions.length
-        ) {
-          generatedQuestions =
-            normalizeGeneratedQuestions(
-              buildGeneratedQuestions(
-                selectedSubjects,
-                questionCount
-              )
-            )
-        }
-
-        if (mode === 'quiz') {
-          generatedQuestions =
-            generatedQuestions.filter(
-              (question) =>
-                Array.isArray(
-                  question.options
-                ) &&
-                question.options.length >
-                0
-            )
-        }
-
-        if (
-          !generatedQuestions.length
-        ) {
-          generatedQuestions =
-            normalizeGeneratedQuestions(
-              buildGeneratedQuestions(
-                selectedSubjects,
-                questionCount
-              )
-            )
-        }
-
-        setQuestions(
-          generatedQuestions
-        )
-
-        setAnswers({})
-        setCurrentQuestionIndex(0)
-        setTranscript([])
-        setMicState('idle')
-        setQuizResults(null)
-        setMasteryResult(null)
-        setVivaResults(null)
-        setExpandedRows({})
-        setSessionStartedAt(
-          Date.now()
-        )
-        setSessionCompletedAt(null)
-
-        setSessionState(
-          mode === 'quiz'
-            ? 'quiz'
-            : 'viva'
-        )
-      } catch (e) {
-        console.error(
-          'Failed to generate test questions',
-          e
-        )
-
-        const generatedQuestions =
-          normalizeGeneratedQuestions(
-            buildGeneratedQuestions(
-              selectedSubjects,
-              questionCount
+        setUploadedDocuments(normalizedDocuments)
+        setSelectedSubjects((previous) =>
+          previous.filter((documentId) =>
+            normalizedDocuments.some(
+              (document) => document.document_id === documentId
             )
           )
-
-        setQuestions(
-          generatedQuestions
         )
-
-        setAnswers({})
-        setCurrentQuestionIndex(0)
-        setTranscript([])
-        setMicState('idle')
-        setQuizResults(null)
-        setMasteryResult(null)
-        setVivaResults(null)
-        setExpandedRows({})
-        setSessionStartedAt(
-          Date.now()
+      } catch (error) {
+        console.error('Failed to load uploaded documents:', error)
+        setUploadedDocuments([])
+        setDocumentsError(
+          error?.message || 'Unable to load uploaded notes.'
         )
-        setSessionCompletedAt(null)
-
-        setSessionState(
-          mode === 'quiz'
-            ? 'quiz'
-            : 'viva'
-        )
+      } finally {
+        setDocumentsLoading(false)
       }
     }
+
+    fetchUploadedDocuments()
+  }, [user?.student_id, user?.id])
+
+  const initializeSession = async () => {
+    console.log('🔥 INITIALIZE SESSION CLICKED')
+    setGenerationError('')
+
+    const studentId = user?.student_id || user?.id
+    const selectedDocumentIds = Array.isArray(selectedSubjects) ? selectedSubjects : []
+
+    if (!studentId) {
+      setGenerationError('Please log in before starting a test.')
+      return
+    }
+
+    if (!mode) {
+      setGenerationError('Please select Quiz Mode or Viva Mode.')
+      return
+    }
+
+    if (!selectedDocumentIds.length) {
+      setGenerationError('Please select at least one of your uploaded PDFs.')
+      return
+    }
+
+    const selectedDocuments = selectedDocumentIds.map((id) => subjectMap.get(id)).filter(Boolean)
+
+    if (!selectedDocuments.length) {
+      setGenerationError('The selected PDFs are no longer available. Please refresh and try again.')
+      return
+    }
+
+    // Show the "Generating session..." screen while we wait for the backend.
+    setGeneratingSession(true)
+
+    try {
+      const selectedSubjectNames = selectedDocuments.map((document) =>
+        document.subject || document.filename?.replace(/\.pdf$/i, '') || 'Uploaded Notes'
+      ).filter(Boolean)
+      const topic = selectedSubjectNames.join(', ')
+
+      console.log('SELECTED DOCUMENTS:', selectedDocuments)
+      console.log('DOCUMENT IDS USED:', selectedDocumentIds)
+
+      const response = await fetch(
+        `${API_URL}/api/v1/tests/generate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            student_id: studentId,
+            document_ids: selectedDocumentIds,
+            topic: topic,
+            num_questions: questionCount,
+          }),
+        }
+      )
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+            data?.message ||
+            `Test generation failed: ${response.status}`
+        )
+      }
+
+      console.log('GENERATE TEST RESPONSE:', data)
+
+      let generatedQuestions = normalizeGeneratedQuestions(
+        data?.questions
+      )
+
+      if (mode === 'quiz') {
+        generatedQuestions = generatedQuestions.filter(
+          (question) =>
+            Array.isArray(question.options) &&
+            question.options.length === 4
+        )
+      }
+
+      if (!generatedQuestions.length) {
+        throw new Error(
+          'No valid questions were generated from the selected PDFs. Make sure all selected PDFs have finished processing.'
+        )
+      }
+
+      setQuestions(generatedQuestions.slice(0, questionCount))
+      setAnswers({})
+      setCurrentQuestionIndex(0)
+      setTranscript([])
+      setMicState('idle')
+      setQuizResults(null)
+      setMasteryResult(null)
+      setVivaResults(null)
+      setExpandedRows({})
+      setSessionStartedAt(Date.now())
+      setSessionCompletedAt(null)
+      setSessionState(mode === 'quiz' ? 'quiz' : 'viva')
+    } catch (error) {
+      console.error('Failed to generate test questions:', error)
+      setQuestions([])
+      setGenerationError(
+        error?.message ||
+          'Unable to generate questions from the selected PDFs.'
+      )
+    } finally {
+      setGeneratingSession(false)
+    }
+  }
 
   const resetToSetup = () => {
     setSessionState('setup')
     setMode(null)
     setSelectedSubjects([])
+    setGenerationError('')
+    setGeneratingSession(false)
     setQuestionCount(10)
     setCustomGuidelines('')
     setQuestions([])
@@ -1180,16 +1133,12 @@ export default function TestPage() {
     setExpandedRows({})
   }
 
-  const toggleSubject = (
-    subjectId
-  ) => {
-    setSelectedSubjects((prev) =>
-      prev.includes(subjectId)
-        ? prev.filter(
-          (value) =>
-            value !== subjectId
-        )
-        : [...prev, subjectId]
+  const toggleSubject = (documentId) => {
+    setGenerationError('')
+    setSelectedSubjects((previous) =>
+      previous.includes(documentId)
+        ? previous.filter((id) => id !== documentId)
+        : [...previous, documentId]
     )
   }
 
@@ -1222,123 +1171,123 @@ export default function TestPage() {
    * 5. Show mastery on Results page
    */
   const handleSubmitQuiz = async () => {
-    if (submitting) return;
+  if (submitting) return;
 
-    const completedAt = Date.now();
+  const completedAt = Date.now();
 
-    const result = createQuizResults(
-      questions,
-      answers,
-      sessionStartedAt,
-      completedAt
+  const result = createQuizResults(
+    questions,
+    answers,
+    sessionStartedAt,
+    completedAt
+  );
+
+  setSubmitting(true);
+  setQuizResults(result);
+  setSessionCompletedAt(completedAt);
+
+  // Check logged-in student
+  if (!user || (!user.student_id && !user.id)) {
+    console.warn(
+      "No logged-in student found. Mastery was not updated."
     );
 
-    setSubmitting(true);
-    setQuizResults(result);
-    setSessionCompletedAt(completedAt);
+    setSubmitting(false);
+    setSessionState("results");
+    return;
+  }
 
-    // Check logged-in student
-    if (!user || (!user.student_id && !user.id)) {
-      console.warn(
-        "No logged-in student found. Mastery was not updated."
-      );
+  const studentId = user.student_id || user.id;
 
-      setSubmitting(false);
-      setSessionState("results");
-      return;
-    }
+  try {
+    /*
+     * Store mastery response for each topic.
+     *
+     * Example:
+     * Python -> Variables
+     * Python -> Loops
+     * DSA -> Algorithms
+     */
+    const masteryResults = {};
 
-    const studentId = user.student_id || user.id;
+    for (const item of result.breakdown) {
+      const subject = item.subjectName || "General";
+      const topic = item.category || "General";
 
-    try {
-      /*
-       * Store mastery response for each topic.
-       *
-       * Example:
-       * Python -> Variables
-       * Python -> Loops
-       * DSA -> Algorithms
-       */
-      const masteryResults = {};
-
-      for (const item of result.breakdown) {
-        const subject = item.subjectName || "General";
-        const topic = item.category || "General";
-
-        try {
-          const response = await fetch(
-            `${API_URL}/api/v1/mastery/update`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                student_id: studentId,
-                subject: subject,
-                topic: topic,
-                is_correct: Boolean(item.isCorrect),
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            const errorText = await response.text();
-
-            throw new Error(
-              `Mastery update failed: ${response.status} ${errorText}`
-            );
+      try {
+        const response = await fetch(
+          `${API_URL}/api/v1/mastery/update`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              student_id: studentId,
+              subject: subject,
+              topic: topic,
+              is_correct: Boolean(item.isCorrect),
+            }),
           }
+        );
 
-          const masteryData = await response.json();
+        if (!response.ok) {
+          const errorText = await response.text();
 
-          console.log(
-            `MASTERY UPDATED: ${subject} -> ${topic}`,
-            masteryData
-          );
-
-          /*
-           * Keep the latest mastery for this topic.
-           * If multiple questions belong to the same topic,
-           * the last response contains the updated value.
-           */
-          masteryResults[`${subject}-${topic}`] = masteryData;
-        } catch (error) {
-          console.error(
-            `Failed to update mastery for ${subject} -> ${topic}:`,
-            error
+          throw new Error(
+            `Mastery update failed: ${response.status} ${errorText}`
           );
         }
-      }
 
-      /*
-       * Save all topic mastery results.
-       *
-       * If your UI currently expects only one mastery object,
-       * this will still keep the last updated topic.
-       */
-      const allMasteryResults = Object.values(masteryResults);
-
-      if (allMasteryResults.length > 0) {
-        setMasteryResult(allMasteryResults);
+        const masteryData = await response.json();
 
         console.log(
-          "FINAL MASTERY RESULTS:",
-          allMasteryResults
+          `MASTERY UPDATED: ${subject} -> ${topic}`,
+          masteryData
         );
-      } else {
-        console.warn("No mastery response received.");
+
+        /*
+         * Keep the latest mastery for this topic.
+         * If multiple questions belong to the same topic,
+         * the last response contains the updated value.
+         */
+        masteryResults[`${subject}-${topic}`] = masteryData;
+      } catch (error) {
+        console.error(
+          `Failed to update mastery for ${subject} -> ${topic}:`,
+          error
+        );
       }
-    } catch (error) {
-      console.error(
-        "Mastery processing failed:",
-        error
-      );
-    } finally {
-      setSubmitting(false);
-      setSessionState("results");
     }
-  };
+
+    /*
+     * Save all topic mastery results.
+     *
+     * If your UI currently expects only one mastery object,
+     * this will still keep the last updated topic.
+     */
+    const allMasteryResults = Object.values(masteryResults);
+
+    if (allMasteryResults.length > 0) {
+      setMasteryResult(allMasteryResults);
+
+      console.log(
+        "FINAL MASTERY RESULTS:",
+        allMasteryResults
+      );
+    } else {
+      console.warn("No mastery response received.");
+    }
+  } catch (error) {
+    console.error(
+      "Mastery processing failed:",
+      error
+    );
+  } finally {
+    setSubmitting(false);
+    setSessionState("results");
+  }
+};
 
   const completedExchangesCount =
     useMemo(() => {
@@ -1360,13 +1309,12 @@ export default function TestPage() {
 
         const question =
           questions[
-          questionIndex %
-          questions.length
+            questionIndex %
+              questions.length
           ] ||
-          practiceQuestionBank[
-          questionIndex %
-          practiceQuestionBank.length
-          ]
+          null
+
+        if (!question) return prev
 
         return [
           ...prev,
@@ -1533,10 +1481,11 @@ export default function TestPage() {
                     >
                       <Button
                         type="button"
-                        className={`mode-card w-100 text-start p-4 ${isActive
-                          ? 'active'
-                          : ''
-                          }`}
+                        className={`mode-card w-100 text-start p-4 ${
+                          isActive
+                            ? 'active'
+                            : ''
+                        }`}
                         onClick={() =>
                           setMode(
                             card.id
@@ -1589,56 +1538,48 @@ export default function TestPage() {
 
           <div className="mb-4">
             <div className="d-flex align-items-center justify-content-between mb-3">
-              <h3
-                className="m-0"
-                style={{
-                  fontSize: 18,
-                  color: '#f8fafc',
-                }}
-              >
-                Subject Domains
+              <h3 className="m-0" style={{ fontSize: 18, color: '#f8fafc' }}>
+                Select Uploaded Notes
               </h3>
-
-              <span
-                style={{
-                  color: '#8a94a6',
-                }}
-              >
-                {selectedSubjects.length
-                  ? `${selectedSubjects.length} selected`
-                  : 'All available by default'}
+              <span style={{ color: '#8a94a6' }}>
+                {selectedSubjects.length ? `${selectedSubjects.length} PDF${selectedSubjects.length === 1 ? '' : 's'} selected` : 'Select one or more PDFs'}
               </span>
             </div>
 
-            <div className="d-flex flex-wrap gap-2">
-              {practiceSubjects.map(
-                (subject) => {
-                  const isActive =
-                    selectedSubjects.includes(
-                      subject.id
-                    )
+            {documentsLoading ? (
+              <div className="panel-surface p-4 text-center" style={{ color: '#8a94a6' }}>
+                Loading your uploaded notes...
+              </div>
+            ) : documentsError ? (
+              <div className="alert alert-danger" role="alert">{documentsError}</div>
+            ) : uploadedDocuments.length === 0 ? (
+              <div className="panel-surface p-4" style={{ color: '#8a94a6' }}>
+                No processed PDFs found. Upload your study notes first, then return here.
+              </div>
+            ) : (
+              <div className="d-flex flex-wrap gap-2">
+                {uploadedDocuments.map((document) => {
+                  const isActive = selectedSubjects.includes(document.document_id)
+                  const label =
+                    document.subject ||
+                    document.filename?.replace(/\.pdf$/i, '') ||
+                    'Uploaded Notes'
 
                   return (
                     <Button
-                      key={subject.id}
+                      key={document.document_id}
                       type="button"
                       size="sm"
-                      className={`subject-chip ${isActive
-                        ? 'active'
-                        : ''
-                        }`}
-                      onClick={() =>
-                        toggleSubject(
-                          subject.id
-                        )
-                      }
+                      className={`subject-chip ${isActive ? 'active' : ''}`}
+                      onClick={() => toggleSubject(document.document_id)}
                     >
-                      {subject.name}
+                      <i className="bi bi-file-earmark-pdf me-2" aria-hidden="true" />
+                      {label}
                     </Button>
                   )
-                }
-              )}
-            </div>
+                })}
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -1658,14 +1599,14 @@ export default function TestPage() {
                   color: '#8a94a6',
                 }}
               >
-                Range 5-100
+                Range 5-15
               </span>
             </div>
 
             <div className="panel-surface p-3 p-md-4">
               <Form.Range
                 min={5}
-                max={100}
+                max={15}
                 value={questionCount}
                 onChange={(event) =>
                   setQuestionCount(
@@ -1684,7 +1625,7 @@ export default function TestPage() {
                 }}
               >
                 <span>5</span>
-                <span>100</span>
+                <span>15</span>
               </div>
             </div>
           </div>
@@ -1840,8 +1781,8 @@ export default function TestPage() {
                 }}
               >
                 {selectedSubjects.length
-                  ? 'Filtered to the selected domains.'
-                  : 'No filter selected, so all available domains will be used.'}
+                  ? 'Questions will be generated only from the selected PDFs.'
+                  : 'Select one or more uploaded PDFs to generate questions from their notes.'}
               </div>
             </Card>
 
@@ -1878,11 +1819,7 @@ export default function TestPage() {
                   fontSize: 13,
                 }}
               >
-                {
-                  setupPreviewQuestions.length
-                }{' '}
-                mock questions currently available
-                for this selection.
+                Questions are generated from all selected uploaded PDFs when you initialize the session.
               </div>
             </Card>
 
@@ -1918,6 +1855,12 @@ export default function TestPage() {
               </div>
             </Card>
 
+            {generationError ? (
+              <div className="alert alert-danger mb-0" role="alert">
+                {generationError}
+              </div>
+            ) : null}
+
             <Button
               type="button"
               size="lg"
@@ -1925,13 +1868,19 @@ export default function TestPage() {
               onClick={
                 initializeSession
               }
-              disabled={!mode}
+              disabled={
+                !mode ||
+                documentsLoading ||
+                uploadedDocuments.length === 0 ||
+                selectedSubjects.length === 0 ||
+                generatingSession
+              }
               style={{
                 borderRadius: 18,
                 minHeight: 56,
               }}
             >
-              Initialize Session
+              {generatingSession ? 'Generating...' : 'Initialize Session'}
             </Button>
           </Stack>
         </Card>
@@ -1939,180 +1888,401 @@ export default function TestPage() {
     </Row>
   )
 
-  const answeredCount = Object.keys(answers).length
-  const unansweredCount = Math.max(questions.length - answeredCount, 0)
-  const quizProgress = questions.length
-    ? ((currentQuestionIndex + 1) / questions.length) * 100
-    : 0
-  const answerProgress = questions.length
-    ? (answeredCount / questions.length) * 100
-    : 0
+  const generatingView = (
+    <Card className="hero-shell p-5 text-center">
+      <div className="d-flex flex-column align-items-center gap-3">
+        <div
+          className="spinner-border"
+          role="status"
+          style={{
+            color: '#38bdf8',
+            width: 48,
+            height: 48,
+          }}
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
 
-  const goToQuestion = (index) => {
-    if (index >= 0 && index < questions.length) {
-      setCurrentQuestionIndex(index)
-    }
-  }
+        <h3
+          className="m-0 fw-semibold"
+          style={{ color: '#f8fafc' }}
+        >
+          Generating your session...
+        </h3>
 
-  const goNextQuestion = () => {
-    setCurrentQuestionIndex((prev) =>
-      Math.min(questions.length - 1, prev + 1)
-    )
-  }
-
-  const goPreviousQuestion = () => {
-    setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
-  }
+        <p
+          className="m-0"
+          style={{
+            color: '#8a94a6',
+            maxWidth: 420,
+          }}
+        >
+          We're pulling content from your selected PDFs and building{' '}
+          {questionCount} {mode === 'viva' ? 'viva prompts' : 'quiz questions'}.
+          This usually takes a few seconds.
+        </p>
+      </div>
+    </Card>
+  )
 
   const quizView =
     currentQuestion ? (
-      <div className="dynamic-quiz">
-        <div className="dynamic-quiz-header">
+      <div className="d-flex flex-column gap-4">
+        <div className="hero-shell p-4 p-xl-5 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 gap-lg-4">
           <div>
-            <div className="dynamic-eyebrow">AI DIGITAL TWIN • QUIZ</div>
-            <h2 className="dynamic-title">
-              Question {currentQuestionIndex + 1}
-              <span> / {questions.length}</span>
+            <div
+              className="text-uppercase small mb-2"
+              style={{
+                letterSpacing:
+                  '0.16em',
+                color: '#8a94a6',
+              }}
+            >
+              Quiz Mode
+            </div>
+
+            <h2
+              className="m-0 fw-semibold"
+              style={{
+                fontSize: 34,
+                color: '#f8fafc',
+              }}
+            >
+              Question{' '}
+              {currentQuestionIndex +
+                1}{' '}
+              of {questions.length}
             </h2>
-            <div className="dynamic-meta">
-              <span><i className="bi bi-check-circle-fill" /> {answeredCount} answered</span>
-              <span><i className="bi bi-circle" /> {unansweredCount} remaining</span>
-            </div>
           </div>
-          <div className="dynamic-timer">
-            <div className="dynamic-timer-icon"><i className="bi bi-stopwatch-fill" /></div>
-            <div>
-              <div className="dynamic-timer-label">TIME ELAPSED</div>
-              <div className="dynamic-timer-value">{elapsedLabel}</div>
+
+          <div className="d-flex flex-column align-items-lg-end gap-2">
+            <Badge className="summary-badge rounded-pill px-3 py-2">
+              Timer {elapsedLabel}
+            </Badge>
+
+            <div
+              style={{
+                color: '#8a94a6',
+                fontSize: 13,
+              }}
+            >
+              Objective practice with answer
+              review
             </div>
           </div>
         </div>
 
-        <div className="dynamic-progress-wrap">
-          <div className="dynamic-progress-info">
-            <span>Quiz Progress</span>
-            <strong>{Math.round(quizProgress)}%</strong>
+        <Card className="panel-surface p-4 p-xl-5">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <Badge className="summary-badge rounded-pill px-3 py-2">
+              Source:{' '}
+              {currentQuestion.sourceLabel ||
+                'Generated'}
+            </Badge>
+
+            <Badge className="summary-badge rounded-pill px-3 py-2">
+              {currentQuestion.category ||
+                'General'}
+            </Badge>
           </div>
-          <div className="dynamic-progress-track">
-            <div className="dynamic-progress-fill" style={{ width: `${quizProgress}%` }} />
-          </div>
-          <div className="dynamic-progress-caption">
-            {answeredCount} of {questions.length} questions answered
-          </div>
-        </div>
 
-        <div className="dynamic-quiz-layout">
-          <Card className="dynamic-question-card">
-            <div className="dynamic-question-head">
-              <div className="dynamic-tags">
-                <span><i className="bi bi-stars" /> {currentQuestion.sourceLabel || 'Generated'}</span>
-                <span>{currentQuestion.subjectName || currentQuestion.category || 'General'}</span>
-                <span>{currentQuestion.category || 'General'}</span>
-              </div>
-              <div className="dynamic-q-number">Q{currentQuestionIndex + 1}</div>
-            </div>
+          <ProgressBar
+            now={
+              questions.length
+                ? ((currentQuestionIndex +
+                    1) /
+                    questions.length) *
+                  100
+                : 0
+            }
+            style={{
+              height: 10,
+              backgroundColor:
+                '#1E293B',
+            }}
+            className="mb-4"
+          />
 
-            <div className="dynamic-question-title-row">
-              <div className="dynamic-question-icon"><i className="bi bi-question-lg" /></div>
-              <h3>{currentQuestion.question}</h3>
-            </div>
+          <h3
+            className="mb-4"
+            style={{
+              fontSize: 28,
+              lineHeight: 1.3,
+              color: '#f8fafc',
+            }}
+          >
+            {currentQuestion.question}
+          </h3>
 
-            <div className="dynamic-options">
-              {(Array.isArray(currentQuestion.options) ? currentQuestion.options : []).map((option, index) => {
-                const selected = answers[currentQuestion.id] === option.id
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={`dynamic-option ${selected ? 'selected' : ''}`}
-                    onClick={() => handleAnswerSelect(currentQuestion.id, option.id)}
-                  >
-                    <span className="dynamic-option-letter">
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <span className="dynamic-option-text">{option.text}</span>
-                    <span className="dynamic-option-check">
-                      <i className={selected ? 'bi bi-check-circle-fill' : 'bi bi-circle'} />
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+          <div className="d-grid gap-3">
+            {(
+              Array.isArray(
+                currentQuestion.options
+              )
+                ? currentQuestion.options
+                : []
+            ).map((option) => {
+              const selected =
+                answers[
+                  currentQuestion.id
+                ] === option.id
 
-            {(!Array.isArray(currentQuestion.options) || currentQuestion.options.length === 0) && (
-              <div className="alert alert-warning mt-3" role="alert">
-                No answer options were returned for this question.
-              </div>
-            )}
+              return (
+                <Button
+                  key={option.id}
+                  type="button"
+                  className={`question-option ${
+                    selected
+                      ? 'active'
+                      : ''
+                  }`}
+                  variant="secondary"
+                  onClick={() =>
+                    handleAnswerSelect(
+                      currentQuestion.id,
+                      option.id
+                    )
+                  }
+                >
+                  <div className="d-flex align-items-start gap-3">
+                    <div
+                      className="d-inline-flex align-items-center justify-content-center"
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 10,
+                        border:
+                          '1px solid #262626',
+                        background:
+                          selected
+                            ? 'rgba(56, 189, 248, 0.16)'
+                            : '#121212',
+                        color:
+                          selected
+                            ? '#7dd3fc'
+                            : '#8a94a6',
+                        flex:
+                          '0 0 auto',
+                      }}
+                    >
+                      {String(
+                        option.id
+                      ).toUpperCase()}
+                    </div>
 
-            <div className="dynamic-navigation">
-              <Button
-                type="button"
-                className="dynamic-nav secondary"
-                onClick={goPreviousQuestion}
-                disabled={currentQuestionIndex === 0}
-              >
-                <i className="bi bi-arrow-left" /> Previous
-              </Button>
-
-              <div className="dynamic-nav-center">
-                <strong>{answeredCount}/{questions.length}</strong>
-                <span>answered</span>
-              </div>
-
-              {currentQuestionIndex < questions.length - 1 ? (
-                <Button type="button" className="dynamic-nav primary" onClick={goNextQuestion}>
-                  Next <i className="bi bi-arrow-right" />
+                    <div className="flex-grow-1">
+                      {option.text}
+                    </div>
+                  </div>
                 </Button>
-              ) : (
+              )
+            })}
+          </div>
+
+          {(!Array.isArray(
+            currentQuestion.options
+          ) ||
+            currentQuestion.options
+              .length === 0) && (
+            <div
+              className="alert alert-warning mt-3"
+              role="alert"
+            >
+              No answer options were returned
+              for this question.
+            </div>
+          )}
+
+          <div
+            className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3 mt-4 pt-4 border-top"
+            style={{
+              borderColor:
+                '#262626',
+            }}
+          >
+            <Button
+              type="button"
+              variant="outline-secondary"
+              onClick={() =>
+                setCurrentQuestionIndex(
+                  (prev) =>
+                    Math.max(
+                      0,
+                      prev - 1
+                    )
+                )
+              }
+              disabled={
+                currentQuestionIndex ===
+                0
+              }
+              style={{
+                minWidth: 132,
+                minHeight: 48,
+              }}
+            >
+              Previous
+            </Button>
+
+            <div
+              className="d-flex align-items-center gap-2"
+              style={{
+                color: '#8a94a6',
+              }}
+            >
+              <i
+                className="bi bi-clock"
+                aria-hidden="true"
+              />
+
+              <span>
+                {elapsedLabel}{' '}
+                elapsed
+              </span>
+            </div>
+
+            <div className="d-flex gap-2">
+              {currentQuestionIndex <
+              questions.length - 1 ? (
                 <Button
                   type="button"
-                  className="dynamic-nav submit"
-                  onClick={handleSubmitQuiz}
-                  disabled={submitting}
+                  variant="primary"
+                  onClick={() =>
+                    setCurrentQuestionIndex(
+                      (prev) =>
+                        Math.min(
+                          questions.length -
+                            1,
+                          prev + 1
+                        )
+                    )
+                  }
+                  style={{
+                    minWidth: 132,
+                    minHeight: 48,
+                  }}
                 >
-                  {submitting ? <><span className="spinner-border spinner-border-sm" /> Submitting...</> : <>Submit Quiz <i className="bi bi-check2-circle" /></>}
+                  Next
                 </Button>
-              )}
-            </div>
-          </Card>
+              ) : null}
 
-          <Card className="dynamic-navigator">
-            <div className="dynamic-navigator-head">
-              <div>
-                <div className="dynamic-eyebrow">QUESTIONS</div>
-                <h4>Quick Navigation</h4>
-              </div>
-              <span>{answeredCount}/{questions.length}</span>
+              {currentQuestionIndex ===
+              questions.length - 1 ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={
+                    handleSubmitQuiz
+                  }
+                  disabled={submitting}
+                  style={{
+                    minWidth: 132,
+                    minHeight: 48,
+                  }}
+                >
+                  {submitting
+                    ? 'Submitting...'
+                    : 'Submit'}
+                </Button>
+              ) : null}
             </div>
+          </div>
+        </Card>
+      </div>
+    ) : (
+      <Card className="panel-surface p-5 text-center">
+        <h4
+          style={{
+            color: '#f8fafc',
+          }}
+        >
+          No quiz questions available
+        </h4>
 
-            <div className="dynamic-answer-progress">
-              <div style={{ width: `${answerProgress}%` }} />
-            </div>
+        <p
+          style={{
+            color: '#8a94a6',
+          }}
+        >
+          Please return to setup and try again.
+        </p>
 
-            <div className="dynamic-question-grid">
-              {questions.map((question, index) => {
-                const isCurrent = index === currentQuestionIndex
-                const isAnswered = answers[question.id] !== undefined
-                return (
-                  <button
-                    key={question.id || index}
-                    type="button"
-                    title={`Question ${index + 1}`}
-                    className={`dynamic-question-btn ${isCurrent ? 'current' : ''} ${isAnswered ? 'answered' : ''}`}
-                    onClick={() => goToQuestion(index)}
-                  >
-                    {isAnswered ? <i className="bi bi-check" /> : index + 1}
-                  </button>
-                )
-              })}
-            </div>
+        <Button
+          onClick={resetToSetup}
+        >
+          Return to Home
+        </Button>
+      </Card>
+    )
 
-            <div className="dynamic-legend">
-              <span><b className="current-dot" /> Current</span>
-              <span><b className="answered-dot" /> Answered</span>
-              <span><b className="pending-dot" /> Pending</span>
-            </div>
+  const vivaView = questions && questions.length > 0 ? (
+    <div className="d-flex flex-column gap-4">
+      <div className="hero-shell p-4 p-xl-5 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 gap-lg-4">
+        <div>
+          <div
+            className="text-uppercase small mb-2"
+            style={{
+              letterSpacing: '0.16em',
+              color: '#8a94a6',
+            }}
+          >
+            Viva Mode
+          </div>
+
+          <h2
+            className="m-0 fw-semibold"
+            style={{
+              fontSize: 34,
+              color: '#f8fafc',
+            }}
+          >
+            {completedExchangesCount} of {questions.length} exchanges completed
+          </h2>
+        </div>
+
+        <div className="d-flex flex-column align-items-lg-end gap-2">
+          <Badge className="summary-badge rounded-pill px-3 py-2">
+            Timer {elapsedLabel}
+          </Badge>
+
+          <div style={{ color: '#8a94a6', fontSize: 13 }}>
+            Tap the mic to hear the next question, tap again to answer
+          </div>
+        </div>
+      </div>
+
+      <Card className="panel-surface p-4 p-xl-5 text-center">
+        <div className="mic-wrap mb-4">
+          <Button
+            type="button"
+            className={`mic-button ${micState}`}
+            onClick={handleMicClick}
+            disabled={!questions.length}
+          >
+            <i
+              className={`bi ${
+                micState === 'listening'
+                  ? 'bi-mic-fill'
+                  : micState === 'speaking'
+                  ? 'bi-volume-up-fill'
+                  : 'bi-mic'
+              }`}
+              aria-hidden="true"
+              style={{ fontSize: 40 }}
+            />
+          </Button>
+        </div>
+
+        <div
+          className="fw-semibold mb-2"
+          style={{ fontSize: 20, color: '#f8fafc' }}
+        >
+          {micState === 'idle'
+            ? 'Tap to hear the next question'
+            : micState === 'speaking'
+            ? 'Examiner is asking a question'
+            : 'Listening — tap again when you\'re done answering'}
+        </div>
 
             <div className="dynamic-session-tip">
               <div><i className="bi bi-lightning-charge-fill" /></div>
@@ -2120,7 +2290,6 @@ export default function TestPage() {
             </div>
           </Card>
         </div>
-      </div>
     ) : (
       <Card className="panel-surface p-5 text-center">
         <h4 style={{ color: '#f8fafc' }}>No quiz questions available</h4>
@@ -2129,20 +2298,10 @@ export default function TestPage() {
       </Card>
     )
 
-  const vivaView = (
-    <VivaRoom
-      initialSubject={selectedSubjectNames[0] || 'Physics'}
-      initialTopic="Core Concepts & Spoken Practice"
-      initialTotalQuestions={questionCount > 10 ? 5 : questionCount}
-      autoStart={true}
-      onExit={resetToSetup}
-    />
-  )
-
   const resultsView =
     sessionState === 'results' &&
-      mode === 'quiz' &&
-      quizResults ? (
+    mode === 'quiz' &&
+    quizResults ? (
       <ResultsShell
         title="Quiz Results"
         eyebrow="Practice Complete"
@@ -2248,7 +2407,7 @@ export default function TestPage() {
                   const expanded =
                     Boolean(
                       expandedRows[
-                      item.id
+                        item.id
                       ]
                     )
 
@@ -2359,7 +2518,7 @@ export default function TestPage() {
         </Card>
       </ResultsShell>
     ) : sessionState ===
-      'results' &&
+        'results' &&
       mode === 'viva' &&
       vivaResults ? (
       <ResultsShell
@@ -2527,13 +2686,13 @@ export default function TestPage() {
             {Array.isArray(
               vivaResults.transcript
             ) &&
-              vivaResults.transcript.length ? (
+            vivaResults.transcript.length ? (
               vivaResults.transcript.map(
                 (entry) => {
                   const expanded =
                     Boolean(
                       expandedRows[
-                      entry.id
+                        entry.id
                       ]
                     )
 
@@ -2598,10 +2757,11 @@ export default function TestPage() {
                           </div>
 
                           <i
-                            className={`bi ${expanded
-                              ? 'bi-chevron-up'
-                              : 'bi-chevron-down'
-                              }`}
+                            className={`bi ${
+                              expanded
+                                ? 'bi-chevron-up'
+                                : 'bi-chevron-down'
+                            }`}
                             aria-hidden="true"
                             style={{
                               color:
@@ -2703,7 +2863,7 @@ export default function TestPage() {
 
       <div className="page-frame">
         {sessionState ===
-          'setup' ? (
+        'setup' ? (
           <div className="hero-shell p-4 p-xl-5 mb-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 gap-lg-4">
             <div>
               <div
@@ -2732,18 +2892,16 @@ export default function TestPage() {
           </div>
         ) : null}
 
-        {sessionState ===
-          'setup'
-          ? setupView
-          : null}
+        {sessionState === 'setup' && generatingSession ? generatingView : null}
+        {sessionState === 'setup' && !generatingSession ? setupView : null}
 
         {sessionState ===
-          'quiz'
+        'quiz'
           ? quizView
           : null}
 
         {sessionState ===
-          'viva'
+        'viva'
           ? vivaView
           : null}
 

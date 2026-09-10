@@ -34,6 +34,12 @@ from database import models
 
 from app.api.routes import router as api_router
 
+# ============================================================
+# VIVA ROUTES
+# ============================================================
+
+from app.routes.viva_routes import router as viva_router
+
 
 # ============================================================
 # FASTAPI APPLICATION
@@ -77,6 +83,16 @@ app.include_router(
 
 
 # ============================================================
+# VIVA ROUTER
+# ============================================================
+
+app.include_router(
+    viva_router,
+    prefix="/api/v1",
+)
+
+
+# ============================================================
 # ROOT ENDPOINT
 # ============================================================
 
@@ -111,3 +127,4 @@ def health_check(
             status_code=500,
             detail=f"Database connection failed: {str(e)}",
         )
+

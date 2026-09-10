@@ -123,3 +123,65 @@ exports.getTopStruggles = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// GET /api/students/:student_id/revision/plan
+exports.getRevisionPlan = async (req, res) => {
+  const { student_id } = req.params;
+  try {
+    const fastApiUrl = `http://localhost:8000/api/v1/revision/${student_id}/plan`;
+    const response = await fetch(fastApiUrl);
+    if (!response.ok) {
+      throw new Error(`FastAPI returned ${response.status}`);
+    }
+    const data = await response.json();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('Error fetching revision plan:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// POST /api/students/:student_id/revision/review
+exports.recordRevisionReview = async (req, res) => {
+  const { student_id } = req.params;
+  const { schedule_id, quality_score } = req.body;
+  try {
+    const fastApiUrl = `http://localhost:8000/api/v1/revision/${student_id}/review`;
+    const response = await fetch(fastApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ schedule_id, quality_score })
+    });
+    if (!response.ok) {
+      throw new Error(`FastAPI returned ${response.status}`);
+    }
+    const data = await response.json();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('Error recording revision review:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// POST /api/students/:student_id/revision/settings
+exports.updateRevisionSettings = async (req, res) => {
+  const { student_id } = req.params;
+  const { max_daily_minutes } = req.body;
+  try {
+    const fastApiUrl = `http://localhost:8000/api/v1/revision/${student_id}/settings`;
+    const response = await fetch(fastApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_daily_minutes })
+    });
+    if (!response.ok) {
+      throw new Error(`FastAPI returned ${response.status}`);
+    }
+    const data = await response.json();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('Error updating revision settings:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+

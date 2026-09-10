@@ -1,26 +1,24 @@
+
 import os
 import json
 import logging
 import re
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from dotenv import load_dotenv
 
-# Load .env
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 class LLMService:
+    """
+    Gemini-based LLM service for generating MCQ test questions.
+    """
 
     def __init__(self):
-
-        self.provider = os.getenv(
-            "LLM_PROVIDER",
-            "gemini"
-        ).lower()
-
+        self.provider = os.getenv("LLM_PROVIDER", "gemini").lower()
         self.llm = self._initialize_llm()
 
     # ============================================================
@@ -28,6 +26,11 @@ class LLMService:
     # ============================================================
 
     def _initialize_llm(self):
+        if self.provider != "gemini":
+            logger.error(
+                f"Unsupported LLM provider: {self.provider}"
+            )
+            return None
 
         gemini_key = (
             os.getenv("GEMINI_API_KEY")
@@ -35,29 +38,21 @@ class LLMService:
         )
 
         if not gemini_key:
-
             logger.error(
-                "GEMINI_API_KEY is missing."
+                "GEMINI_API_KEY or GOOGLE_API_KEY is missing."
             )
-
             return None
 
         try:
-
             from langchain_google_genai import ChatGoogleGenerativeAI
 
             logger.info(
-                "Initializing Gemini..."
+                "Initializing Gemini with gemini-3.6-flash..."
             )
-
-            # IMPORTANT:
-            # gemini-2.0-flash is no longer available
-            # for your API. Use gemini-3.6-flash.
 
             llm = ChatGoogleGenerativeAI(
                 model="gemini-3.6-flash",
                 google_api_key=gemini_key,
-                temperature=0.2
             )
 
             logger.info(
@@ -67,12 +62,10 @@ class LLMService:
             return llm
 
         except Exception as e:
-
             logger.error(
                 f"Gemini initialization failed: {e}",
                 exc_info=True
             )
-
             return None
 
     # ============================================================
@@ -80,37 +73,31 @@ class LLMService:
     # ============================================================
 
     def _extract_response_text(self, response) -> str:
+        """
+        Extract plain text from LangChain Gemini response.
+        Gemini may return content as a string or a list of
+        dictionaries containing a 'text' field.
+        """
 
-        content = response.content
+        if response is None:
+            return ""
 
-        # --------------------------------------------------------
-        # Gemini/LangChain can return:
-        #
-        # [
-        #   {
-        #       "type": "text",
-        #       "text": "..."
-        #   }
-        # ]
-        # --------------------------------------------------------
+        content = getattr(response, "content", "")
+
+        if isinstance(content, str):
+            return content.strip()
 
         if isinstance(content, list):
-
             text_parts = []
 
             for item in content:
-
                 if isinstance(item, dict):
-
                     text_value = item.get("text")
 
                     if text_value:
-                        text_parts.append(
-                            str(text_value)
-                        )
+                        text_parts.append(str(text_value))
 
                 elif isinstance(item, str):
-
                     text_parts.append(item)
 
             return "".join(text_parts).strip()
@@ -118,78 +105,65 @@ class LLMService:
         return str(content).strip()
 
     # ============================================================
-    # CLEAN JSON RESPONSE
+    # EXTRACT JSON ARRAY
     # ============================================================
 
-    def _extract_json_array(self, content: str):
+    def _extract_json_array(
+        self,
+        content: str
+    ) -> Optional[List]:
 
         if not content:
+            logger.error(
+                "Gemini returned empty content."
+            )
             return None
 
         content = content.strip()
 
-        # --------------------------------------------------------
-        # Remove ```json
-        # --------------------------------------------------------
-
+        # Remove Markdown code fences if Gemini adds them
         content = re.sub(
-            r"```json",
+            r"```json\s*",
             "",
             content,
             flags=re.IGNORECASE
         )
 
-        # --------------------------------------------------------
-        # Remove ```
-        # --------------------------------------------------------
+        content = content.replace('`', '').strip()
 
-        content = content.replace(
-            "```",
-            ""
-        )
-
-        content = content.strip()
-
-        # --------------------------------------------------------
-        # Find first [ and last ]
-        # --------------------------------------------------------
-
+        # Find JSON array
         start = content.find("[")
-
         end = content.rfind("]")
 
-        if start == -1 or end == -1:
-
+        if start == -1 or end == -1 or end <= start:
             logger.error(
                 "No JSON array found in Gemini response."
             )
-
+            logger.error(
+                f"Gemini response:\n{content}"
+            )
             return None
 
-        json_text = content[
-            start:end + 1
-        ].strip()
-
-        # --------------------------------------------------------
-        # Parse JSON
-        # --------------------------------------------------------
+        json_text = content[start:end + 1].strip()
 
         try:
+            parsed = json.loads(json_text)
 
-            return json.loads(
-                json_text
-            )
+            if not isinstance(parsed, list):
+                logger.error(
+                    "Parsed JSON is not a list."
+                )
+                return None
+
+            return parsed
 
         except json.JSONDecodeError as e:
-
             logger.error(
                 f"JSON parsing failed: {e}"
             )
-
             logger.error(
                 f"Gemini JSON response:\n{json_text}"
             )
-
             return None
 
     # ============================================================
@@ -201,24 +175,17 @@ class LLMService:
         question: Dict
     ) -> bool:
 
-        if not isinstance(
-            question,
-            dict
-        ):
+        if not isinstance(question, dict):
             return False
 
-        topic = question.get(
-            "topic"
-        )
+        topic = question.get("topic")
+        question_text = question.get("question_text")
+        options = question.get("options")
+        correct_answer = question.get("correct_answer")
+        explanation = question.get("explanation")
+        source_citation = question.get("source_citation")
 
-        question_text = question.get(
-            "question_text"
-        )
-
-        correct_answer = question.get(
-            "correct_answer"
-        )
-
+        # Required fields
         if not topic:
             return False
 
@@ -228,22 +195,40 @@ class LLMService:
         if not correct_answer:
             return False
 
-        question_text = str(
-            question_text
-        ).strip()
+        if not explanation:
+            return False
 
-        correct_answer = str(
+        if not source_citation:
+            return False
+
+        # Options must contain exactly four strings
+        if not isinstance(options, list):
+            return False
+
+        if len(options) != 4:
+            return False
+
+        if not all(
+            isinstance(option, str) and option.strip()
+            for option in options
+        ):
+            return False
+
+        # Correct answer must exactly match one option
+        options_clean = [
+            option.strip()
+            for option in options
+        ]
+
+        correct_answer_clean = str(
             correct_answer
         ).strip()
 
-        options = question.get("options")
-        if not isinstance(options, list) or len(options) != 4:
+        if correct_answer_clean not in options_clean:
             return False
-            
-        if not question.get("explanation"):
-            return False
-            
-        if not question.get("source_citation"):
+
+        # Exactly one option should equal the correct answer
+        if options_clean.count(correct_answer_clean) != 1:
             return False
 
         return True
@@ -258,67 +243,64 @@ class LLMService:
         num_questions: int = 5,
     ) -> List[Dict]:
 
-        # ========================================================
-        # CLAMP num_questions TO SAFE RANGE
-        # ========================================================
+        # --------------------------------------------------------
+        # Safe question range
+        # --------------------------------------------------------
 
-        num_questions = max(1, min(num_questions, 15))
+        num_questions = max(
+            1,
+            min(num_questions, 15)
+        )
 
-        # ========================================================
-        # VALIDATE CONTEXT
-        # ========================================================
+        # --------------------------------------------------------
+        # Validate context
+        # --------------------------------------------------------
 
         if not context_text:
-
             logger.error(
                 "Context text is empty."
             )
-
             return []
 
         context_text = context_text.strip()
 
         if not context_text:
-
             logger.error(
                 "Context text is empty after stripping."
             )
-
             return []
 
-        # ========================================================
-        # LIMIT CONTEXT SIZE
-        # ========================================================
+        # --------------------------------------------------------
+        # Limit context size
+        # --------------------------------------------------------
 
         if len(context_text) > 30000:
-
             logger.info(
-                "Context is large. Limiting to 30000 characters."
+                "Context exceeds 30000 characters. "
+                "Truncating context."
             )
 
             context_text = context_text[:30000]
 
-        # ========================================================
-        # CHECK GEMINI
-        # ========================================================
+        # --------------------------------------------------------
+        # Check Gemini
+        # --------------------------------------------------------
 
         if self.llm is None:
-
             logger.error(
                 "Gemini LLM is not initialized."
             )
-
             return []
 
-        # ========================================================
-        # PROMPT
-        # ========================================================
+        # --------------------------------------------------------
+        # Prompt
+        # --------------------------------------------------------
 
         prompt = f"""
 You are an expert teacher and educational quiz generator.
 
-Create EXACTLY {num_questions} high-quality multiple-choice questions
-using ONLY the study material provided below.
+Create EXACTLY {num_questions} high-quality multiple-choice
+questions using ONLY the study material provided below.
 
 STRICT RULES:
 
@@ -331,39 +313,46 @@ STRICT RULES:
 4. Test actual concepts, definitions, facts, examples,
    applications, characteristics, comparisons, or relationships.
 5. Each question MUST have exactly FOUR options.
-6. Options MUST be an array of 4 string options.
+6. Options MUST be an array containing exactly 4 strings.
 7. There MUST be exactly ONE correct option.
-8. Wrong options must be plausible but incorrect according
+8. The correct_answer MUST exactly match one of the options.
+9. Wrong options must be plausible but incorrect according
    to the study material.
-9. Do NOT invent facts that are not present in the study material.
-10. Do NOT repeat questions.
-11. Keep questions clear and suitable for students.
-12. Return EXACTLY {num_questions} question objects.
+10. Do NOT invent facts that are not present in the study material.
+11. Do NOT repeat questions.
+12. Keep questions clear and suitable for students.
 13. Return ONLY valid JSON.
 14. Do NOT use Markdown.
 15. Do NOT use ```json.
 16. Do NOT add explanations before or after the JSON.
 
-IMPORTANT:
+Each question object MUST contain:
 
-Each object MUST have the following structure:
-- "topic": a short topic string (e.g., "Math", "History")
-- "question_text": the question string
-- "options": an array of 4 string options
-- "correct_answer": the exact correct answer string (must match one of the options)
-- "explanation": a short explanation of why the answer is correct
-- "source_citation": a short citation of where in the text this was found
+- "topic"
+- "question_text"
+- "options"
+- "correct_answer"
+- "explanation"
+- "source_citation"
 
-Return exactly this JSON structure:
+Return exactly this structure:
 
 [
   {{
     "topic": "Artificial Intelligence",
     "question_text": "What is Artificial Intelligence?",
-    "options": ["Simulation of human intelligence in machines", "A type of database", "A programming language", "A computer network"],
-    "correct_answer": "Simulation of human intelligence in machines",
-    "explanation": "AI refers to simulating human intelligence.",
-    "source_citation": "Page 1, Paragraph 2"
+    "options": [
+      "Simulation of human intelligence in machines",
+      "A type of database",
+      "A programming language",
+      "A computer network"
+    ],
+    "correct_answer":
+      "Simulation of human intelligence in machines",
+    "explanation":
+      "AI refers to simulating human intelligence in machines.",
+    "source_citation":
+      "Page 1, Paragraph 2"
   }}
 ]
 
@@ -372,27 +361,25 @@ STUDY MATERIAL:
 {context_text}
 """
 
-        # ========================================================
-        # CALL GEMINI
-        # ========================================================
+        # --------------------------------------------------------
+        # Call Gemini
+        # --------------------------------------------------------
 
         try:
-
             logger.info(
-                "Sending quiz generation request to Gemini..."
+                f"Sending request to Gemini for "
+                f"{num_questions} questions..."
             )
 
-            response = self.llm.invoke(
-                prompt
-            )
+            response = self.llm.invoke(prompt)
 
             logger.info(
                 "Gemini response received."
             )
 
-            # ====================================================
-            # EXTRACT ACTUAL TEXT
-            # ====================================================
+            # ----------------------------------------------------
+            # Extract response text
+            # ----------------------------------------------------
 
             content = self._extract_response_text(
                 response
@@ -407,92 +394,85 @@ STUDY MATERIAL:
             )
 
             if not content:
-
                 logger.error(
                     "Gemini returned empty content."
                 )
-
                 return []
 
-            # ====================================================
-            # EXTRACT JSON
-            # ====================================================
+            # ----------------------------------------------------
+            # Extract JSON
+            # ----------------------------------------------------
 
             questions = self._extract_json_array(
                 content
             )
 
             if questions is None:
-
                 return []
 
-            # ====================================================
-            # CHECK ARRAY
-            # ====================================================
+            # ----------------------------------------------------
+            # Validate number of questions
+            # ----------------------------------------------------
 
-            if not isinstance(
-                questions,
-                list
-            ):
-
+            if len(questions) != num_questions:
                 logger.error(
-                    "Gemini response is not a JSON array."
+                    f"Gemini returned {len(questions)} questions "
+                    f"but exactly {num_questions} were required."
                 )
-
                 return []
 
-            # ====================================================
-            # VALIDATE QUESTIONS
-            # ========================================================
+            # ----------------------------------------------------
+            # Validate each question
+            # ----------------------------------------------------
 
             valid_questions = []
 
-            for index, question in enumerate(
-                questions
-            ):
+            for index, question in enumerate(questions):
 
                 if not self._validate_question(
                     question
                 ):
-
                     logger.warning(
                         f"Question {index + 1} failed validation."
                     )
-
                     continue
 
+                cleaned_question = {
+                    "topic": str(
+                        question["topic"]
+                    ).strip(),
+
+                    "question_text": str(
+                        question["question_text"]
+                    ).strip(),
+
+                    "options": [
+                        str(option).strip()
+                        for option in question["options"]
+                    ],
+
+                    "correct_answer": str(
+                        question["correct_answer"]
+                    ).strip(),
+
+                    "explanation": str(
+                        question["explanation"]
+                    ).strip(),
+
+                    "source_citation": str(
+                        question["source_citation"]
+                    ).strip(),
+                }
+
                 valid_questions.append(
-                    {
-                        "topic": str(
-                            question["topic"]
-                        ).strip(),
-
-                        "question_text": str(
-                            question["question_text"]
-                        ).strip(),
-
-                        "options": [str(opt).strip() for opt in question["options"]],
-
-                        "correct_answer": str(
-                            question["correct_answer"]
-                        ).strip(),
-
-                        "explanation": str(
-                            question["explanation"]
-                        ).strip(),
-
-                        "source_citation": str(
-                            question["source_citation"]
-                        ).strip(),
-                    }
+                    cleaned_question
                 )
 
-            # ====================================================
-            # REMOVE DUPLICATES
-            # ====================================================
+            # ----------------------------------------------------
+            # Remove duplicate questions
+            # ----------------------------------------------------
 
             unique_questions = []
-
             seen_questions = set()
 
             for question in valid_questions:
@@ -501,58 +481,140 @@ STUDY MATERIAL:
                     r"\s+",
                     " ",
                     question["question_text"].lower()
-                )
+                ).strip()
 
                 if normalized in seen_questions:
+                    logger.warning(
+                        "Duplicate question detected and removed."
+                    )
                     continue
 
-                seen_questions.add(
-                    normalized
-                )
-
-                unique_questions.append(
-                    question
-                )
+                seen_questions.add(normalized)
+                unique_questions.append(question)
 
             valid_questions = unique_questions
 
-            # ====================================================
-            # LOG RESULT
-            # ====================================================
+            # ----------------------------------------------------
+            # Final exact-count validation
+            # ----------------------------------------------------
+
+            if len(valid_questions) != num_questions:
+                logger.error(
+                    f"Expected exactly {num_questions} valid questions "
+                    f"after validation, but received "
+                    f"{len(valid_questions)}."
+                )
+                return []
 
             logger.info(
-                f"Gemini generated "
+                f"Successfully generated "
                 f"{len(valid_questions)} valid questions."
             )
 
-            # ====================================================
-            # EXACTLY num_questions REQUIRED
-            # ====================================================
-
-            if len(valid_questions) != num_questions:
-
-                logger.error(
-                    f"Expected exactly {num_questions} valid questions, "
-                    f"but received {len(valid_questions)}."
-                )
-
-                return []
-
-            return valid_questions[:num_questions]
-
-        # ========================================================
-        # EXCEPTION
-        # ========================================================
+            return valid_questions
 
         except Exception as e:
-
             logger.error(
                 f"Gemini question generation failed: {e}",
                 exc_info=True
             )
-
             return []
 
+
+    # ============================================================
+    # EVALUATE VIVA ANSWER
+    # ============================================================
+
+    def evaluate_viva_answer(
+        self,
+        context: str,
+        question: str,
+        answer: str,
+        topic: str = "General",
+    ) -> Dict:
+        
+        if not answer.strip():
+            return {
+                "score": 0,
+                "is_correct": False,
+                "feedback": "No answer provided.",
+                "strengths": [],
+                "areas_to_improve": ["Provide a complete answer"]
+            }
+
+        prompt = f'''
+You are an expert examiner evaluating a student's answer in a viva (oral exam).
+Evaluate the student's answer against the context provided.
+Be fair and encouraging, but accurate.
+
+Topic: {topic}
+Question: {question}
+Student's Answer: {answer}
+
+Reference Context:
+{context}
+
+Respond in pure JSON format only, with no markdown formatting or \\\json block.
+The JSON must contain exactly these fields:
+- "score": A number out of 10 based on accuracy and completeness.
+- "is_correct": Boolean (true if score >= 5, false otherwise).
+- "feedback": A 1-2 sentence response directly to the student explaining what they got right or wrong.
+- "strengths": An array of up to 2 short strings pointing out good aspects of their answer.
+- "areas_to_improve": An array of up to 2 short strings pointing out missing details or errors.
+'''
+        try:
+            response = self.llm.invoke(prompt)
+            content = self._extract_response_text(response)
+            
+            # Remove markdown if present
+            content = re.sub(r"```json\s*", "", content, flags=re.IGNORECASE)
+            content = content.replace('`', '').strip()
+            
+            evaluation = json.loads(content)
+            return evaluation
+        except Exception as e:
+            logger.error(f"Error evaluating viva answer: {e}")
+            raise
+
+    # ============================================================
+    # GENERATE VIVA FOLLOW-UP
+    # ============================================================
+
+    def generate_viva_follow_up(
+        self,
+        context: str,
+        previous_question: str,
+        previous_answer: str,
+    ) -> Dict:
+
+        prompt = f'''
+You are an expert examiner conducting a viva (oral exam).
+The student just answered a question. Generate the next question.
+The next question should logically follow up on their previous answer OR test another concept from the context.
+Keep the question conversational and spoken-style. Do NOT generate multiple-choice options.
+
+Context:
+{context}
+
+Previous Question: {previous_question}
+Student's Answer: {previous_answer}
+
+Respond in pure JSON format only, with no markdown formatting or \\\json block.
+The JSON must contain exactly this field:
+- "question": The question string to ask the student.
+'''
+        try:
+            response = self.llm.invoke(prompt)
+            content = self._extract_response_text(response)
+            
+            content = re.sub(r"```json\s*", "", content, flags=re.IGNORECASE)
+            content = content.replace('`', '').strip()
+            
+            result = json.loads(content)
+            return result
+        except Exception as e:
+            logger.error(f"Error generating viva follow-up: {e}")
+            raise
 
 # ============================================================
 # SINGLETON
@@ -562,11 +624,11 @@ _llm_service_instance = None
 
 
 def get_llm_service() -> LLMService:
-
     global _llm_service_instance
 
     if _llm_service_instance is None:
-
         _llm_service_instance = LLMService()
 
     return _llm_service_instance
+
+

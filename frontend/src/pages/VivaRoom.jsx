@@ -6,7 +6,14 @@ import {
   Sparkles, RefreshCw, BarChart2, Check, X, ChevronRight, Download
 } from 'lucide-react';
 
-const FASTAPI_WS_URL = import.meta.env.VITE_FASTAPI_WS_URL || 'ws://localhost:8000/api/v1/ws/viva';
+// NOTE (Member 2 / STT-TTS): the real backend mounts the viva
+// router at /api/v1/viva, with sessions created via POST /start
+// and then joined at /api/v1/viva/ws/{session_id} - it does NOT
+// accept a bare "start_viva" event over a session-less socket.
+// This was flagged to the team; keeping the old FASTAPI_WS_URL
+// export in case other code still imports it.
+const FASTAPI_API_BASE = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000/api/v1';
+const FASTAPI_WS_BASE = import.meta.env.VITE_FASTAPI_WS_URL || 'ws://localhost:8000/api/v1';
 
 const SUBJECT_OPTIONS = ['Physics', 'Chemistry', 'Mathematics', 'Computer Science', 'Biology'];
 
@@ -15,7 +22,11 @@ export default function VivaRoom({
   initialTopic = 'Core Concepts & Thermodynamics',
   initialTotalQuestions = 5,
   autoStart = false,
-  onExit = null
+  onExit = null,
+  // TODO: wire to real auth/session context - placeholder until
+  // Member 1/4 finalize how the logged-in student's UUID reaches
+  // this page.
+  studentId = null
 }) {
   // Session Configuration & State
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -56,6 +67,13 @@ export default function VivaRoom({
   const audioContextRef = useRef(null);
   const animFrameRef = useRef(null);
 
+  // Real Mic Capture (Whisper) & Server TTS Playback
+  const sessionIdRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const ttsAudioElRef = useRef(null);
+
   // Error Handling
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -83,6 +101,8 @@ export default function VivaRoom({
       if (wsRef.current) wsRef.current.close();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       if (timerRef.current) clearInterval(timerRef.current);
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      if (ttsAudioElRef.current) ttsAudioElRef.current.pause();
     };
   }, []);
 
@@ -180,30 +200,144 @@ export default function VivaRoom({
   const stopTts = () => {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      setTtsSpeaking(false);
-      setRecordingState('LISTENING');
+    }
+    if (ttsAudioElRef.current) {
+      ttsAudioElRef.current.pause();
+      ttsAudioElRef.current.currentTime = 0;
+    }
+    setTtsSpeaking(false);
+    setRecordingState('LISTENING');
+  };
+
+  // Plays real examiner voice (OpenAI TTS, base64 mp3) when the
+  // backend provided it; falls back to the browser's built-in
+  // speechSynthesis (already implemented above) when it didn't -
+  // e.g. OPENAI_API_KEY isn't configured yet.
+  const playExaminerVoice = (text, audioBase64, audioFormat = 'mp3') => {
+    if (!audioBase64) {
+      speakText(text);
+      return;
+    }
+
+    try {
+      const audio = new Audio(`data:audio/${audioFormat};base64,${audioBase64}`);
+      ttsAudioElRef.current = audio;
+
+      audio.onplay = () => {
+        setTtsSpeaking(true);
+        setRecordingState('SPEAKING');
+      };
+      audio.onended = () => {
+        setTtsSpeaking(false);
+        setRecordingState('LISTENING');
+      };
+      audio.onerror = () => {
+        console.warn('Server TTS playback failed, falling back to speechSynthesis.');
+        setTtsSpeaking(false);
+        speakText(text);
+      };
+
+      audio.play().catch(() => speakText(text));
+    } catch (e) {
+      speakText(text);
     }
   };
 
+  // ------------------------------------------------------------
+  // Real Microphone Capture (sent to backend for Whisper STT)
+  // ------------------------------------------------------------
+  const startMediaCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.start();
+    } catch (err) {
+      console.warn('Microphone capture failed to start:', err);
+      setMicPermission('denied');
+      setErrorMessage('Could not access the microphone for recording.');
+    }
+  };
+
+  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+
+  // Stops the recorder and returns the captured audio as base64,
+  // or null if nothing was recorded (e.g. mic never started).
+  const stopMediaCaptureAndEncode = () => new Promise((resolve) => {
+    const recorder = mediaRecorderRef.current;
+
+    if (!recorder || recorder.state === 'inactive') {
+      resolve(null);
+      return;
+    }
+
+    recorder.onstop = async () => {
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      if (audioChunksRef.current.length === 0) {
+        resolve(null);
+        return;
+      }
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const base64 = await blobToBase64(blob);
+      resolve(base64);
+    };
+
+    recorder.stop();
+  });
+
   // Setup Web Socket Connection
-  const connectWebSocket = () => {
+  // The real backend needs a session first (POST /viva/start,
+  // which runs the RAG lookup + generates question 1), THEN a
+  // WebSocket join at /viva/ws/{session_id}. Without a studentId
+  // we can't create that session, so we drop straight to the
+  // local simulator rather than failing silently.
+  const connectWebSocket = async () => {
     setWsStatus('connecting');
     setErrorMessage('');
 
+    if (!studentId) {
+      console.warn('No studentId provided; using local viva simulator.');
+      enableFallbackMode();
+      return;
+    }
+
     try {
-      const ws = new WebSocket(FASTAPI_WS_URL);
+      const startRes = await fetch(`${FASTAPI_API_BASE}/viva/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: studentId,
+          topic: topic,
+          max_questions: totalQuestions
+        })
+      });
+
+      if (!startRes.ok) {
+        throw new Error(`viva/start failed: ${startRes.status}`);
+      }
+
+      const startData = await startRes.json();
+      sessionIdRef.current = startData.session_id;
+
+      const ws = new WebSocket(`${FASTAPI_WS_BASE}/viva/ws/${startData.session_id}`);
       wsRef.current = ws;
 
       ws.onopen = () => {
         setWsStatus('connected');
         setFallbackMode(false);
-        // Send start viva command
-        ws.send(JSON.stringify({
-          event: 'start_viva',
-          subject: subject,
-          topic: topic,
-          total_questions: totalQuestions
-        }));
       };
 
       ws.onmessage = (msg) => {
@@ -228,8 +362,22 @@ export default function VivaRoom({
           enableFallbackMode();
         }
       };
+
+      // The start_viva REST call already returned question 1
+      // synchronously (no TTS attached there yet - only the WS
+      // path attaches audio_base64). Surface it immediately so
+      // the student isn't staring at a blank screen while the
+      // socket opens.
+      const q = startData.question || {};
+      setCurrentQuestion(q.question || '');
+      setCurrentQuestionIndex(startData.question_number || 1);
+      setSessionStarted(true);
+      setShowConfigModal(false);
+      setRecordingState('LISTENING');
+      if (autoPlayTts && q.question) speakText(q.question);
+
     } catch (e) {
-      console.warn('WebSocket connection failed:', e);
+      console.warn('WebSocket/session bootstrap failed:', e);
       enableFallbackMode();
     }
   };
@@ -259,75 +407,103 @@ export default function VivaRoom({
   };
 
   // Handle Backend WebSocket Messages
+  // NOTE: the real backend keys its messages by "type", not
+  // "event" - e.g. {"type": "question", ...}. Handled below.
   const handleWebSocketMessage = (data) => {
-    switch (data.event) {
-      case 'viva_started':
+    switch (data.type) {
+      case 'connection':
+        // Just an ack that the socket joined the session; no UI change needed.
+        break;
+
+      case 'question':
         setCurrentQuestion(data.question);
-        setCurrentQuestionIndex(data.current_question_index || 1);
-        setTotalQuestions(data.total_questions || totalQuestions);
+        setCurrentQuestionIndex(data.question_number || 1);
+        setCurrentFeedback(null);
+        setLiveTranscript('');
+        setEditedTranscript('');
         setSessionStarted(true);
         setShowConfigModal(false);
         setRecordingState('LISTENING');
-        if (autoPlayTts) speakText(data.question);
+        if (autoPlayTts) playExaminerVoice(data.question, data.audio_base64, data.audio_format);
+        if (data.tts_error) console.warn('Examiner TTS unavailable:', data.tts_error);
         break;
 
-      case 'eval_feedback':
+      case 'audio_received':
+        // Backend acked the recorded audio and is running Whisper.
+        setRecordingState('PROCESSING');
+        break;
+
+      case 'transcript_ready':
+        // Whisper's transcript for what the student just said.
+        setLiveTranscript(data.text || '');
+        setEditedTranscript(data.text || '');
+        break;
+
+      case 'evaluation_started':
+        setRecordingState('EVALUATING');
+        break;
+
+      case 'evaluation': {
+        const evaluation = data.evaluation || {};
         const feedbackObj = {
           question_number: data.question_number,
-          total_questions: data.total_questions,
-          score: data.score,
-          feedback: data.feedback,
-          strengths: data.strengths || [],
-          weak_concepts: data.weak_concepts || [],
-          sample_answer: data.sample_answer
+          score: evaluation.score,
+          feedback: evaluation.feedback,
+          strengths: evaluation.strengths || [],
+          weak_concepts: evaluation.areas_to_improve || [],
         };
 
         setCurrentFeedback(feedbackObj);
         setRecordingState('IDLE');
 
-        // Add to history
         setConversationHistory(prev => [
           ...prev,
           {
             number: data.question_number,
-            question: currentQuestion,
-            student_answer: editedTranscript || liveTranscript || '(No answer provided)',
-            score: data.score,
-            feedback: data.feedback,
-            strengths: data.strengths,
-            weak_concepts: data.weak_concepts
+            question: data.question || currentQuestion,
+            student_answer: data.answer || editedTranscript || liveTranscript || '(No answer provided)',
+            score: evaluation.score,
+            feedback: evaluation.feedback,
+            strengths: evaluation.strengths,
+            weak_concepts: evaluation.areas_to_improve
           }
         ]);
         break;
+      }
 
-      case 'next_question':
-        setCurrentQuestion(data.question);
-        setCurrentQuestionIndex(data.current_question_index);
-        setCurrentFeedback(null);
-        setLiveTranscript('');
-        setEditedTranscript('');
-        setRecordingState('LISTENING');
-        if (autoPlayTts) speakText(data.question);
-        break;
-
-      case 'viva_completed':
+      case 'session_completed':
+      case 'session_ended':
+      case 'session_timeout': {
+        const summary = data.summary || {};
         setSessionCompleted(true);
         setRecordingState('IDLE');
         stopTts();
         setFinalResult({
-          final_score: data.final_score,
-          average_question_score: data.average_question_score,
-          grade: data.grade,
-          summary: data.summary,
-          strengths: data.strengths || [],
-          weak_areas: data.weak_areas || [],
-          history: data.history || conversationHistory
+          final_score: summary.average_score != null ? Math.round((summary.average_score / 10) * 100) : undefined,
+          average_question_score: summary.average_score,
+          grade: summary.performance_label,
+          summary: summary.performance_label
+            ? `${summary.performance_label} performance across ${summary.total_questions} question(s).`
+            : 'Viva completed.',
+          strengths: summary.strengths || [],
+          weak_areas: summary.areas_to_improve || [],
+          history: (data.transcript || []).map(ex => ({
+            question_number: ex.question_number,
+            question: ex.question,
+            student_answer: ex.answer,
+            score: ex.evaluation?.score,
+            feedback: ex.evaluation?.feedback
+          }))
         });
+        break;
+      }
+
+      case 'pong':
         break;
 
       case 'error':
         setErrorMessage(data.message || 'An error occurred during viva.');
-        setRecordingState('IDLE');
+        setRecordingState(data.code === 'NO_ACTIVE_QUESTION' ? 'IDLE' : 'LISTENING');
         break;
 
       default:
@@ -355,6 +531,15 @@ export default function VivaRoom({
     setRecordingState('RECORDING');
     setLiveTranscript('');
     setEditedTranscript('');
+
+    // Real path: capture actual audio for Whisper. This runs
+    // alongside the Web Speech API below, which is kept only for
+    // an instant on-screen caption while the student talks - the
+    // authoritative transcript comes back from the backend via
+    // "transcript_ready" once Whisper processes the recording.
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !fallbackMode) {
+      startMediaCapture();
+    }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -416,24 +601,47 @@ export default function VivaRoom({
   };
 
   // Submit Answer
-  const handleSubmitAnswer = () => {
+  const handleSubmitAnswer = async () => {
+    const isRealMode = wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !fallbackMode;
+    const hasRecordedAudio = isRealMode && mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive';
     const finalAnswerText = (editedTranscript || liveTranscript || interimTranscript).trim();
 
-    if (!finalAnswerText) {
+    if (!finalAnswerText && !hasRecordedAudio) {
       setErrorMessage('Please speak or enter an answer before submitting.');
       return;
     }
 
     stopRecording();
-    setRecordingState('EVALUATING');
     setErrorMessage('');
 
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !fallbackMode) {
-      wsRef.current.send(JSON.stringify({
-        event: 'submit_answer',
-        text: finalAnswerText
-      }));
+    if (isRealMode) {
+      if (hasRecordedAudio) {
+        // Send the raw recording - backend runs Whisper and replies
+        // with "transcript_ready", then evaluates automatically.
+        setRecordingState('PROCESSING');
+        const audioBase64 = await stopMediaCaptureAndEncode();
+
+        if (!audioBase64) {
+          setErrorMessage('No audio was captured. Please try recording again.');
+          setRecordingState('LISTENING');
+          return;
+        }
+
+        wsRef.current.send(JSON.stringify({
+          type: 'audio',
+          data: audioBase64,
+          filename: 'answer.webm'
+        }));
+      } else {
+        // No mic recording (e.g. typed answer only) - send as text.
+        setRecordingState('EVALUATING');
+        wsRef.current.send(JSON.stringify({
+          type: 'transcript',
+          text: finalAnswerText
+        }));
+      }
     } else {
+      setRecordingState('EVALUATING');
       // Local Mock Evaluation
       setTimeout(() => {
         const mockScore = Math.floor(Math.random() * 3) + 8; // 8-10
@@ -468,7 +676,10 @@ export default function VivaRoom({
   // Next Question
   const handleNextQuestion = () => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !fallbackMode) {
-      wsRef.current.send(JSON.stringify({ event: 'next_question' }));
+      // Real backend already pushed the next question over the
+      // socket right after evaluation - just dismiss the feedback
+      // card, the "question" handler above set everything else.
+      setCurrentFeedback(null);
     } else {
       // Fallback Next Question logic
       if (currentQuestionIndex < totalQuestions) {
@@ -502,7 +713,7 @@ export default function VivaRoom({
     stopRecording();
 
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && !fallbackMode) {
-      wsRef.current.send(JSON.stringify({ event: 'end_viva' }));
+      wsRef.current.send(JSON.stringify({ type: 'end' }));
     } else {
       // Local completion
       setSessionCompleted(true);
