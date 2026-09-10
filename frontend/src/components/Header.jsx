@@ -61,6 +61,14 @@ const Header = () => {
             </li>
 
             <li>
+              <Link to="/revision-planner" className="nav-link nav-item-custom">
+                <i className="bi bi-calendar-check me-1"></i>
+                Revision Planner
+              </Link>
+            </li>
+
+
+            <li>
               <Link
                 to="/student-profile"
                 className="nav-link nav-item-custom"
