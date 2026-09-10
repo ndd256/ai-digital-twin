@@ -65,8 +65,9 @@ function App() {
           {/* Protected Student Dashboard */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-          {/* Protected Revision Planner */}
-          <Route path="/revision-planner" element={<ProtectedRoute><RevisionPlanner /></ProtectedRoute>} />
+          {/* Revision Planner */}
+          <Route path="/revision-planner" element={<RevisionPlanner />} />
+
 
 
           {/* Public Home */}
